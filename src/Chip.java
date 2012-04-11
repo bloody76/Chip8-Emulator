@@ -266,7 +266,7 @@ public class Chip
 			}
 			break;
 		default:
-			System.out.print("Unknown opcode: ");	
+			System.err.print("Unknown opcode: " + opcode);	
 		}
 	}
 	
