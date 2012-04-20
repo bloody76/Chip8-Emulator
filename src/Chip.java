@@ -1,21 +1,23 @@
 import java.util.Random;
 
+import javax.swing.JFrame;
+
 public class Chip
 {
 	
-	private char[] mem = new char[4096];
-	private short pc = 0x200;
-	private short opcode = 0;
-	private short I = 0;
-	private char[] register = new char[16];
+	private int[] mem = new int[4096];
+	private int pc = 0x200;
+	private int opcode = 0;
+	private int I = 0;
+	private int[] register = new int[16];
 	
-	private char delayTimer = 0;
-	private char soundTimer = 0;
-	private char graphics[] = new char[64 * 32];
+	private int delayTimer = 0;
+	private int soundTimer = 0;
+	public char graphics[] = new char[64 * 32];
 	
-	private short stack[] = new short[16];
-	private short sp = 0;
-	private char chip8_fontset[] =
+	private int stack[] = new int[16];
+	private int sp = 0;
+	private short chip8_fontset[] =
 	{ 
 	  0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
 	  0x20, 0x60, 0x20, 0x20, 0x70, // 1
@@ -34,7 +36,7 @@ public class Chip
 	  0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
 	  0xF0, 0x80, 0xF0, 0x80, 0x80  // F
 	};
-	private char[] keys = new char[16];
+	public char[] keys = new char[16];
 	
 	public void initializeChip()
 	{
@@ -54,16 +56,61 @@ public class Chip
 		sp = 0;
 		for (int i = 0; i < 16; i++)
 			keys[i] = 0;
-		
 		for(int i = 0; i < 80; ++i)
 			mem[i] = chip8_fontset[i];
 		
 	}
 	
+	public void loadROM() throws Exception
+	{
+		int[] pong =
+		{
+				0x22, 0xfc, 0x6b, 0x0c, 0x6c, 0x3f, 0x6d, 0x0c, 0xa2, 0xea, 0xda, 0xb6, 0xdc, 0xd6, 0x6e, 0x00,
+				0x22, 0xd4, 0x66, 0x03, 0x68, 0x02, 0x60, 0x60, 0xf0, 0x15, 0xf0, 0x07, 0x30, 0x00, 0x12, 0x1a,
+				0xc7, 0x17, 0x77, 0x08, 0x69, 0xff, 0xa2, 0xf0, 0xd6, 0x71, 0xa2, 0xea, 0xda, 0xb6, 0xdc, 0xd6,
+				0x60, 0x01, 0xe0, 0xa1, 0x7b, 0xfe, 0x60, 0x04, 0xe0, 0xa1, 0x7b, 0x02, 0x60, 0x1f, 0x8b, 0x02,
+				0xda, 0xb6, 0x60, 0x0c, 0xe0, 0xa1, 0x7d, 0xfe, 0x60, 0x0d, 0xe0, 0xa1, 0x7d, 0x02, 0x60, 0x1f,
+				0x8d, 0x02, 0xdc, 0xd6, 0xa2, 0xf0, 0xd6, 0x71, 0x86, 0x84, 0x87, 0x94, 0x60, 0x3f, 0x86, 0x02,
+				0x61, 0x1f, 0x87, 0x12, 0x46, 0x00, 0x12, 0x78, 0x46, 0x3f, 0x12, 0x82, 0x47, 0x1f, 0x69, 0xff,
+				0x47, 0x00, 0x69, 0x01, 0xd6, 0x71, 0x12, 0x2a, 0x68, 0x02, 0x63, 0x01, 0x80, 0x70, 0x80, 0xb5,
+				0x12, 0x8a, 0x68, 0xfe, 0x63, 0x0a, 0x80, 0x70, 0x80, 0xd5, 0x3f, 0x01, 0x12, 0xa2, 0x61, 0x02,
+				0x80, 0x15, 0x3f, 0x01, 0x12, 0xba, 0x80, 0x15, 0x3f, 0x01, 0x12, 0xc8, 0x80, 0x15, 0x3f, 0x01,
+				0x12, 0xc2, 0x60, 0x20, 0xf0, 0x18, 0x22, 0xd4, 0x8e, 0x34, 0x22, 0xd4, 0x66, 0x3e, 0x33, 0x01,
+				0x66, 0x03, 0x68, 0xfe, 0x33, 0x01, 0x68, 0x02, 0x12, 0x16, 0x79, 0xff, 0x49, 0xfe, 0x69, 0xff,
+				0x12, 0xc8, 0x79, 0x01, 0x49, 0x02, 0x69, 0x01, 0x60, 0x04, 0xf0, 0x18, 0x76, 0x01, 0x46, 0x40,
+				0x76, 0xfe, 0x12, 0x6c, 0xa2, 0xf2, 0xfe, 0x33, 0xf2, 0x65, 0xf1, 0x29, 0x64, 0x14, 0x65, 0x02,
+				0xd4, 0x55, 0x74, 0x15, 0xf2, 0x29, 0xd4, 0x55, 0x00, 0xee, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
+				0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0xc0, 0xc0, 0xc0, 0x00, 0xff, 0x00, 0x6b, 0x20, 0x6c, 0x00,
+				0xa2, 0xf6, 0xdb, 0xc4, 0x7c, 0x04, 0x3c, 0x20, 0x13, 0x02, 0x6a, 0x00, 0x6b, 0x00, 0x6c, 0x1f,
+				0xa2, 0xfa, 0xda, 0xb1, 0xda, 0xc1, 0x7a, 0x08, 0x3a, 0x40, 0x13, 0x12, 0xa2, 0xf6, 0x6a, 0x00,
+				0x6b, 0x20, 0xdb, 0xa1, 0x00, 0xee,
+		};
+		//FileReader fr = new FileReader("PONG");
+		//BufferedReader br = new BufferedReader(fr);
+		
+		for (int i = 0; i < pong.length; i++)
+		{
+			mem[i + 0x200] = pong[i];
+		}
+			
+		/*while (br.ready() && i < 4096 - 0x200)
+		{
+			char c = (int) br.read();
+			if (c > 0xFF)
+					c = (int) (c + 0xFF);
+			System.out.println("" + Integer.toString(c) + " " + Integer.toHexString((int)c));
+			mem[i + 0x200] = c;
+			i++;
+		}*/
+		
+		//br.close();
+		//fr.close();
+	}
+	
 	public void cycle()
 	{
 		//Fetch
-		opcode = (short) (mem[pc] << 8 | mem[pc + 1]);
+		opcode = mem[pc] << 8 | mem[pc + 1];
 		
 		//Decode
 		switch (opcode & 0xF000)
@@ -84,50 +131,49 @@ public class Chip
 			pc += 2;
 			break;
 		case 0x1000: // Jump to to NNN from 0x1NNN.
-			pc = (short) (opcode & 0x0FFF);
-			pc += 2;
+			pc = (int) (opcode & 0x0FFF);
 			break;
 		case 0x2000: // Call subroutines at address NNN from 0x2NNN.
-			stack[sp++] = (short) pc;
-			pc = (short) (opcode & 0x0FFF);
+			stack[sp++] = (int) pc;
+			pc = (int) (opcode & 0x0FFF);
 			break;
 		case 0x3000:
-			if (register[opcode & 0x0F00 >> 8] == (opcode & 0x00FF))
+			if (register[(opcode & 0x0F00) >> 8] == (opcode & 0x00FF))
 				pc += 2;
 			pc += 2;
 			break;
 		case 0x4000:
-			if (register[opcode & 0x0F00 >> 8] != (opcode & 0x00FF))
+			if (register[(opcode & 0x0F00) >> 8] != (opcode & 0x00FF))
 				pc += 2;
 			pc += 2;
 			break;
 		case 0x5000:
-			if (register[opcode & 0x0F00 >> 8] == register[opcode & 0x00F0 >> 4])
+			if (register[(opcode & 0x0F00) >> 8] == register[(opcode & 0x00F0) >> 4])
 				pc += 2;
 			pc += 2;
 			break;
 		case 0x6000:
-			register[opcode & 0x0F00 >> 8] = (char) (opcode & 0x00FF);
+			register[(opcode & 0x0F00) >> 8] = (int) (opcode & 0x00FF);
 			pc += 2;
 			break;
 		case 0x7000:
-			register[opcode & 0x0F00 >> 8] += (char) (opcode & 0x00FF);
+			register[(opcode & 0x0F00) >> 8] += (int) (opcode & 0x00FF);
 			pc += 2;
 			break;
 		case 0x8000:
 			switch (opcode & 0x000F)
 			{
 			case 0x0: // 0x8XY0: Sets VX to the value of VY.
-				register[opcode & 0x0F00 >> 8] = register[opcode & 0x00F0 >> 4];
+				register[(opcode & 0x0F00) >> 8] = register[(opcode & 0x00F0) >> 4];
 				break;
 			case 0x1: //8XY1: Sets VX to VX or VY.
-				register[opcode & 0x0F00 >> 8] |= register[opcode & 0x00F0 >> 4];
+				register[(opcode & 0x0F00) >> 8] |= register[(opcode & 0x00F0) >> 4];
 				break;
 			case 0x2: //8XY2: Sets VX to VX and VY.
-				register[opcode & 0x0F00 >> 8] &= register[opcode & 0x00F0 >> 4];
+				register[(opcode & 0x0F00) >> 8] &= register[(opcode & 0x00F0) >> 4];
 				break;
 			case 0x3: //8XY3: Sets VX to VX xor VY.
-				register[opcode & 0x0F00 >> 8] ^= register[opcode & 0x00F0 >> 4];
+				register[(opcode & 0x0F00) >> 8] ^= register[(opcode & 0x00F0) >> 4];
 				break;
 			case 0x4:
 				if(register[(opcode & 0x00F0) >> 4] > (0xFF - register[(opcode & 0x0F00) >> 8]))
@@ -144,8 +190,8 @@ public class Chip
 				register[(opcode & 0x0F00) >> 8] -= register[(opcode & 0x00F0) >> 4];
 				break;
 			case 0x6:
-				register[0xF] = (char) (register[opcode & 0x0F00 >> 8] & 0x1);
-				register[opcode & 0x0F00 >> 8] >>= 1;
+				register[0xF] = (int) (register[(opcode & 0x0F00) >> 8] & 0x1);
+				register[(opcode & 0x0F00) >> 8] >>= 1;
 				break;
 			case 0x7:
 				if(register[(opcode & 0x0F00) >> 8] > register[(opcode & 0x00F0) >> 4]) 
@@ -155,7 +201,7 @@ public class Chip
 				register[(opcode & 0x00F0) >> 4] -= register[(opcode & 0x0F00) >> 8];
 				break;
 			case 0xE:
-				register[0xF] = (char) (register[(opcode & 0x0F00) >> 8] & 0x8000);
+				register[0xF] = (int) (register[(opcode & 0x0F00) >> 8] & 0x8000);
 				register[(opcode & 0x0F00) >> 8] <<= 1;
 				break;
 			}
@@ -167,31 +213,34 @@ public class Chip
 			pc += 2;
 			break;
 		case 0xA000:
-			I = (short) (opcode & 0x0FFF);
+			I = (int) (opcode & 0x0FFF);
 			pc += 2;
 			break;
 		case 0xB000:
-			pc = (short) ((opcode & 0x0FFF) + register[0x0]);
+			pc = (int) ((opcode & 0x0FFF) + register[0x0]);
 			break;
 		case 0xC000:
 			Random r = new Random();
-			register[(opcode & 0x0F00) >> 8] = (char) (r.nextInt() & (opcode & 0x00FF));
+			register[(opcode & 0x0F00) >> 8] = (int) (r.nextInt() & (opcode & 0x00FF));
 			pc += 2;
 			break;
 		case 0xD000:
-			short x = (short) register[(opcode & 0x0F00) >> 8];
-			short y = (short) register[(opcode & 0x00F0) >> 4];
-			short height = (short) (opcode & 0x000F);
-			short pixel;
+			int x = (int) register[(opcode & 0x0F00) >> 8];
+			int y = (int) register[(opcode & 0x00F0) >> 4];
+			int height = (int) (opcode & 0x000F);
+			int pixel;
 
 			register[0xF] = 0;
 			for (int yline = 0; yline < height; yline++)
 			{
-				pixel = (short) mem[I + yline];
+				pixel = (int) mem[I + yline];
 				for(int xline = 0; xline < 8; xline++)
 				{
 					if((pixel & (0x80 >> xline)) != 0)
 					{
+						//This line should not exists.
+						if ((x + xline + ((y + yline) * 64)) > 2048)
+							continue;
 						if(graphics[(x + xline + ((y + yline) * 64))] == 1)
 						{
 							register[0xF] = 1;                                    
@@ -224,7 +273,14 @@ public class Chip
 				pc += 2;
 				break;
 			case 0x000A:
-				//TODO: Must handle the keys.
+				char pressed = '\0';
+				System.out.println("ispress?");
+				while (pressed == '\0')
+				{
+					for (int i = 0; i < 16; i++)
+						pressed |= keys[i];
+				}
+				System.out.println(pressed);
 				pc += 2;
 				break;
 			case 0x0015:
@@ -244,13 +300,13 @@ public class Chip
 				pc += 2;
 				break;
 			case 0x0029:
-				I = (short) (register[(opcode & 0x0F00) >> 8] * 0x5);
+				I = (int) (register[(opcode & 0x0F00) >> 8] * 0x5);
 				pc += 2;
 				break;
 			case 0x0033:
-				mem[I]     = (char) (register[(opcode & 0x0F00) >> 8] / 100);
-				mem[I + 1] = (char) ((register[(opcode & 0x0F00) >> 8] / 10) % 10);
-				mem[I + 2] = (char) ((register[(opcode & 0x0F00) >> 8] % 100) % 10);					
+				mem[I]     = (int) (register[(opcode & 0x0F00) >> 8] / 100);
+				mem[I + 1] = (int) ((register[(opcode & 0x0F00) >> 8] / 10) % 10);
+				mem[I + 2] = (int) ((register[(opcode & 0x0F00) >> 8] % 100) % 10);					
 				pc += 2;
 				break;
 			case 0x0055:
@@ -270,13 +326,38 @@ public class Chip
 		}
 	}
 	
-	public void run()
+	public void run(JFrame frame)
 	{
 		initializeChip();
+		try
+		{
+			loadROM();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
 		
 		for (;;)
 		{
 			cycle();
+			
+			if (soundTimer > 0)
+				soundTimer--;
+			if (delayTimer > 0)
+				delayTimer--;
+			
+			frame.update(frame.getGraphics());
+			
+			try{
+			  Thread.currentThread();
+				//do what you want to do before sleeping
+			  Thread.sleep(50);//sleep for 50 ms
+			  //do what you want to do after sleeptig
+			}
+			catch(Exception ie){
+			//If this thread was intrrupted by nother thread 
+			}
 		}
 	}
 }
