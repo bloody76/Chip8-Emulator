@@ -5,11 +5,10 @@ import javax.swing.*;
 @SuppressWarnings("serial")
 public class DrawPanel extends JFrame implements KeyListener
 {
-    public static final int     width     = 650;
-    public static final int     height    = 330;
-    Chip    chip      = null;
-
-    private DrawCanvas canvas;
+    private static final int     width     = 650;
+    private static final int     height    = 330;
+    private Chip                 chip      = null;
+    private DrawCanvas           canvas    = null;
 
     public static void main(String[] args)
     {
@@ -31,13 +30,13 @@ public class DrawPanel extends JFrame implements KeyListener
 
     public DrawPanel(String file)
     {
-        canvas = new DrawCanvas();
-        canvas.setPreferredSize(new Dimension(width, height));
+        this.canvas = new DrawCanvas();
+        this.canvas.setPreferredSize(new Dimension(width, height));
         this.setContentPane(canvas);
-        this.setDefaultCloseOperation(EXIT_ON_CLOSE);   // Handle the CLOSE button
-        this.pack();              // Either pack() the components; or setSize()
+        this.setDefaultCloseOperation(EXIT_ON_CLOSE); // Handle the CLOSE button
+        this.pack();                                  // Either pack() the components; or setSize()
         this.setTitle("Chip8-Emulator");
-        this.setVisible(true);    // this JFrame show
+        this.setVisible(true);                        // this JFrame show
         this.addKeyListener(this);
 
         this.chip = new Chip();
@@ -51,6 +50,8 @@ public class DrawPanel extends JFrame implements KeyListener
                 while (true)
                 {
                     chip.Step();
+                    if (chip.getSoundTimer() == 0)
+                        getToolkit().beep();
                     repaint();
                     try
                     {
@@ -58,6 +59,8 @@ public class DrawPanel extends JFrame implements KeyListener
                     }
                     catch (InterruptedException e)
                     {
+                        System.err.println("Error in sleeping the thread.");
+                        e.printStackTrace();
                     }
                 }
             }
@@ -75,9 +78,9 @@ public class DrawPanel extends JFrame implements KeyListener
             g.setColor(Color.black);
             g.fillRect(0, 0, width, height);
             g.setColor(Color.green);
-            for (int i = 0; i < 64; i++)
-                for (int j = 0; j < 32; j++)
-                    if (chip.graphics[i + 64 * j] != 0)
+            for (int i = 0; i < 64; ++i)
+                for (int j = 0; j < 32; ++j)
+                    if (chip.getGraphics()[i + 64 * j] != 0)
                         g.fillRect(i * 10, j * 10, 10, 10);
         }
     }
@@ -87,52 +90,52 @@ public class DrawPanel extends JFrame implements KeyListener
         switch (e.getKeyChar())
         {
         case 'é':
-            chip.keys[0] = 1;
+            chip.setKey(0);
             break;
         case '"':
-            chip.keys[1] = 1;
+            chip.setKey(1);
             break;
         case '\'':
-            chip.keys[2] = 1;
+            chip.setKey(2);
             break;
         case 'a':
-            chip.keys[3] = 1;
+            chip.setKey(3);
             break;
         case 'z':
-            chip.keys[4] = 1;
+            chip.setKey(4);
             break;
         case 'e':
-            chip.keys[5] = 1;
+            chip.setKey(5);
             break;
         case 'r':
-            chip.keys[6] = 1;
+            chip.setKey(6);
             break;
         case 'q':
-            chip.keys[7] = 1;
+            chip.setKey(7);
             break;
         case 's':
-            chip.keys[8] = 1;
+            chip.setKey(8);
             break;
         case 'd':
-            chip.keys[9] = 1;
+            chip.setKey(9);
             break;
         case 'f':
-            chip.keys[10] = 1;
+            chip.setKey(10);
             break;
         case 'g':
-            chip.keys[11] = 1;
+            chip.setKey(11);
             break;
         case 'w':
-            chip.keys[12] = 1;
+            chip.setKey(12);
             break;
         case 'x':
-            chip.keys[13] = 1;
+            chip.setKey(13);
             break;
         case 'c':
-            chip.keys[14] = 1;
+            chip.setKey(14);
             break;
         case 'v':
-            chip.keys[15] = 1;
+            chip.setKey(15);
             break;
         default:
             break;

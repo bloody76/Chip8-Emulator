@@ -4,19 +4,20 @@ import java.io.*;
 public class Chip
 {
 
-    private int[] mem = new int[4096];
-    private int pc = 0x200;
-    private int op = 0;
-    private int I = 0;
-    private int[] reg = new int[16];
+    private int[]   mem = new int[4096];
+    private int[]   reg = new int[16];
+    private int     stack[] = new int[16];
 
-    private int delayTimer = 0;
-    private int soundTimer = 0;
-    public char graphics[] = new char[64 * 32];
+    private int     pc = 0x200;
+    private int     op = 0;
+    private int     I = 0;
+    private int     sp = 0;
 
-    private int stack[] = new int[16];
-    private int sp = 0;
-    private short chip8_fontset[] =
+    private int     delayTimer = 0;
+    private int     soundTimer = 0;
+    private char    graphics[] = new char[64 * 32];
+
+    private short   chip8_fontset[] =
     {
       0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
       0x20, 0x60, 0x20, 0x20, 0x70, // 1
@@ -35,32 +36,47 @@ public class Chip
       0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
       0xF0, 0x80, 0xF0, 0x80, 0x80  // F
     };
-    public int[] keys = new int[16];
+    private int[] keys = new int[16];
 
-    public void InitializeChip()
+    public void setKey(int key)
     {
-        for (int i = 0; i < 4096; i++)
+        keys[key] = 1;
+    }
+
+    public int getSoundTimer()
+    {
+        return soundTimer;
+    }
+
+    public char[] getGraphics()
+    {
+        return graphics;
+    }
+
+    private void InitializeChip()
+    {
+        for (int i = 0; i < 4096; ++i)
             mem[i] = 0;
         pc = 0x200;
         op = 0;
         I = 0;
-        for (int i = 0; i < 16; i++)
+        for (int i = 0; i < 16; ++i)
             reg[i] = 0;
         delayTimer = 0;
         soundTimer = 0;
-        for (int i = 0; i < 64 * 32; i++)
+        for (int i = 0; i < 64 * 32; ++i)
             graphics[i] = 0;
-        for (int i = 0; i < 16; i++)
+        for (int i = 0; i < 16; ++i)
             stack[i] = 0;
         sp = 0;
-        for (int i = 0; i < 16; i++)
+        for (int i = 0; i < 16; ++i)
             keys[i] = 0;
         for(int i = 0; i < 80; ++i)
             mem[i] = chip8_fontset[i];
 
     }
 
-    public void loadROM(String file) throws Exception
+    private void loadROM(String file) throws Exception
     {
         FileInputStream fs = new FileInputStream(file);
         int c = fs.read();
@@ -72,12 +88,11 @@ public class Chip
         fs.close();
     }
 
-    public void Cycle()
+    private void Cycle()
     {
         //Fetch
         op = mem[pc] << 8 | mem[pc + 1];
 
-        System.out.println("op: " + Integer.toHexString(op));
         //Decode
         switch (op & 0xF000)
         {
@@ -145,7 +160,7 @@ public class Chip
             case 0x4: // 8XY4 : Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there isn't.
                 if(reg[(op & 0x00F0) >> 4] > (0xFF - (reg[(op & 0x0F00) >> 8])))
                     reg[0xF] = 1; // carry
-                  else
+                else
                     reg[0xF] = 0;
                 reg[(op & 0x0F00) >> 8] += reg[(op & 0x00F0) >> 4];
                 reg[(op & 0x0F00) >> 8] &= 0x00FF;
@@ -167,11 +182,11 @@ public class Chip
                     reg[0xF] = 0; // there is a borrow
                 else
                     reg[0xF] = 1;
-                reg[(op & 0x00F0) >> 4] -= reg[(op & 0x0F00) >> 8];
-                reg[(op & 0x00F0) >> 4] &= 0x00FF;
+                reg[(op & 0x0F00) >> 8] = reg[(op & 0x00F0) >> 4] - reg[(op & 0x0F00) >> 8];
+                reg[(op & 0x0F00) >> 8] &= 0x00FF;
                 break;
             case 0xE: // 8XYE : Shifts VX left by one. VF is set to the value of the most significant bit of VX before the shift.
-                reg[0xF] = (int) (reg[(op & 0x0F00) >> 8] & 0x8000);
+                reg[0xF] = (int) (reg[(op & 0x0F00) >> 8] >> 7);
                 reg[(op & 0x0F00) >> 8] <<= 1;
                 reg[(op & 0x0F00) >> 8] &= 0x00FF;
                 break;
@@ -202,10 +217,10 @@ public class Chip
             int pixel;
 
             reg[0xF] = 0;
-            for (int yline = 0; yline < height; yline++)
+            for (int yline = 0; yline < height; ++yline)
             {
                 pixel = (int) mem[I + yline];
-                for(int xline = 0; xline < 8; xline++)
+                for(int xline = 0; xline < 8; ++xline)
                 {
                     if((pixel & (0x80 >> xline)) != 0)
                     {
@@ -227,7 +242,10 @@ public class Chip
             {
                 case 0x009E: // EX9E : Skips the next instruction if the key stored in VX is pressed.
                 if (keys[reg[(op & 0x0F00) >> 8]] == 1)
+                {
+                    keys[reg[(op & 0x0F00) >> 8]] = 0;
                     pc += 2;
+                }
                 pc += 2;
                 break;
                 case 0x00A1: // EXA1 : Skips the next instruction if the key stored in VX isn't pressed.
@@ -270,6 +288,7 @@ public class Chip
                     reg[0xF] = 1;
                 else
                     reg[0xF] = 0;
+
                 I += reg[(op & 0x0F00) >> 8];
                 I &= 0x0FFF;
                 pc += 2;
@@ -287,17 +306,19 @@ public class Chip
             case 0x0055: // FX55 : Stores V0 to VX in memory starting at address I.
                 for (int i = 0; i <= ((op & 0x0F00) >> 8); ++i)
                     mem[I + i] = reg[i];
+                I += ((op & 0x0F00) >> 8) + 1;
                 pc += 2;
                 break;
             case 0x0065: // FX65 : Fills V0 to VX with values from memory starting at address I.
                 for (int i = 0; i <= ((op & 0x0F00) >> 8); ++i)
                     reg[i] = mem[I + i];
+                I += ((op & 0x0F00) >> 8) + 1;
                 pc += 2;
                 break;
             }
             break;
         default:
-            System.err.print("Unknown op: " + op);
+            System.err.print("Unknown opcode: " + op);
         }
     }
 
@@ -310,7 +331,7 @@ public class Chip
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            System.err.println("Please enter a valid rom location.");
         }
     }
 
@@ -319,8 +340,8 @@ public class Chip
         Cycle();
 
         if (soundTimer > 0)
-            soundTimer--;
+            --soundTimer;
         if (delayTimer > 0)
-            delayTimer--;
+            --delayTimer;
     }
 }
