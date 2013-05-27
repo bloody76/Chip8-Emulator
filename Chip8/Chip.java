@@ -1,3 +1,5 @@
+package Chip8;
+
 import java.util.Random;
 import java.io.*;
 
