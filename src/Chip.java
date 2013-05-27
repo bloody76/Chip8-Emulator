@@ -55,24 +55,24 @@ public class Chip
 
     private void InitializeChip()
     {
-        for (int i = 0; i < 4096; ++i)
-            mem[i] = 0;
         pc = 0x200;
         op = 0;
         I = 0;
-        for (int i = 0; i < 16; ++i)
-            reg[i] = 0;
         delayTimer = 0;
         soundTimer = 0;
+        sp = 0;
         for (int i = 0; i < 64 * 32; ++i)
             graphics[i] = 0;
         for (int i = 0; i < 16; ++i)
+        {
             stack[i] = 0;
-        sp = 0;
-        for (int i = 0; i < 16; ++i)
+            reg[i] = 0;
             keys[i] = 0;
+        }
         for(int i = 0; i < 80; ++i)
             mem[i] = chip8_fontset[i];
+        for (int i = 0; i < 4096; ++i)
+            mem[i] = 0;
 
     }
 
