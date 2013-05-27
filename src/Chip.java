@@ -3,7 +3,6 @@ import java.io.*;
 
 public class Chip
 {
-
     private int[]   mem = new int[4096];
     private int[]   reg = new int[16];
     private int     stack[] = new int[16];
