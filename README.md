@@ -1,7 +1,7 @@
 Chip8-Emulator
 ==============
 
-This java program is a simple interpretor for CHIP-8 programs.
+This java program is a simple interpreter for CHIP-8 programs.
 
 How to compile ?
 ================
