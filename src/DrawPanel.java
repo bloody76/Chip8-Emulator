@@ -41,7 +41,7 @@ public class DrawPanel extends JFrame implements KeyListener
         this.addKeyListener(this);
 
         this.chip = new Chip();
-        this.chip.poweron(file);
+        this.chip.PowerOn(file);
 
         Thread updateThread = new Thread()
         {
@@ -50,7 +50,7 @@ public class DrawPanel extends JFrame implements KeyListener
             {
                 while (true)
                 {
-                    chip.step();
+                    chip.Step();
                     repaint();
                     try
                     {
@@ -84,55 +84,54 @@ public class DrawPanel extends JFrame implements KeyListener
 
     public void keyPressed(KeyEvent e)
     {
-        //System.out.println("KEY PRESSED: " + (int)e.getKeyChar());
         switch (e.getKeyChar())
         {
-        case '0':
+        case 'é':
             chip.keys[0] = 1;
             break;
-        case '2': // Player 1 : down
+        case '"':
             chip.keys[1] = 1;
             break;
-        case '1':
+        case '\'':
             chip.keys[2] = 1;
             break;
-        case '3':
+        case 'a':
             chip.keys[3] = 1;
             break;
-        case '5': // Player 1 : up
+        case 'z':
             chip.keys[4] = 1;
             break;
-        case '4':
+        case 'e':
             chip.keys[5] = 1;
             break;
-        case '6':
+        case 'r':
             chip.keys[6] = 1;
             break;
-        case '7':
+        case 'q':
             chip.keys[7] = 1;
             break;
-        case '8':
+        case 's':
             chip.keys[8] = 1;
             break;
-        case '9':
+        case 'd':
             chip.keys[9] = 1;
             break;
-        case 'a':
+        case 'f':
             chip.keys[10] = 1;
             break;
-        case 'b':
+        case 'g':
             chip.keys[11] = 1;
             break;
-        case 's': //Player 2 : Up
+        case 'w':
             chip.keys[12] = 1;
             break;
-        case 'z': //Player 2 : Down
+        case 'x':
             chip.keys[13] = 1;
             break;
-        case 'e':
+        case 'c':
             chip.keys[14] = 1;
             break;
-        case 'f':
+        case 'v':
             chip.keys[15] = 1;
             break;
         default:
@@ -142,59 +141,6 @@ public class DrawPanel extends JFrame implements KeyListener
 
     public void keyReleased(KeyEvent e)
     {
-        /*switch (e.getKeyChar())
-        {
-        case '0':
-            chip.keys[0] = 0;
-            break;
-        case '2': // Player 1 : down
-            chip.keys[1] = 0;
-            break;
-        case '1':
-            chip.keys[2] = 0;
-            break;
-        case '3':
-            chip.keys[3] = 0;
-            break;
-        case '5': // Player 1 : up
-            chip.keys[4] = 0;
-            break;
-        case '4':
-            chip.keys[5] = 0;
-            break;
-        case '6':
-            chip.keys[6] = 0;
-            break;
-        case '7':
-            chip.keys[7] = 0;
-            break;
-        case '8':
-            chip.keys[8] = 0;
-            break;
-        case '9':
-            chip.keys[9] = 0;
-            break;
-        case 'a':
-            chip.keys[10] = 0;
-            break;
-        case 'b':
-            chip.keys[11] = 0;
-            break;
-        case 's': //Player 2 : Up
-            chip.keys[12] = 0;
-            break;
-        case 'z': //Player 2 : Down
-            chip.keys[13] = 0;
-            break;
-        case 'e':
-            chip.keys[14] = 0;
-            break;
-        case 'f':
-            chip.keys[15] = 0;
-            break;
-        default:
-            break;
-        }*/
     }
 
     @Override
